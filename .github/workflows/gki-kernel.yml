@@ -492,19 +492,18 @@ jobs:
           cd "$CONFIG"
 
           # Copy our eBPF configuration script
-          cat > apply_ebpf_config.sh << 'EBPF_SCRIPT'
+          cp ${{ github.workspace }}/apply_ebpf_config.sh . 2>/dev/null || true
+
+          # If script doesn't exist in repo, create it inline
+          if [ ! -f apply_ebpf_config.sh ]; then
+            cat > apply_ebpf_config.sh << 'EOF'
 #!/bin/bash
-# Script to apply full eBPF kernel configuration
-
 CONFIG_FILE="./common/arch/arm64/configs/gki_defconfig"
-
 echo "Applying full eBPF configuration to $CONFIG_FILE"
 
-# Function to add or update a config option
 add_config() {
     local option="$1"
     local config_name="${option%=*}"
-
     if grep -q "^${config_name}=" "$CONFIG_FILE"; then
         sed -i "s|^${config_name}=.*|${option}|" "$CONFIG_FILE"
     elif grep -q "^# ${config_name} is not set" "$CONFIG_FILE"; then
@@ -513,6 +512,10 @@ add_config() {
         echo "$option" >> "$CONFIG_FILE"
     fi
 }
+EOF
+          fi
+
+          cat >> apply_ebpf_config.sh << 'EOF'
 
 echo "Adding eBPF configurations..."
 # BASIC BPF SUPPORT
@@ -621,7 +624,7 @@ add_config "CONFIG_TASK_IO_ACCOUNTING=y"
 add_config "CONFIG_TASK_DELAY_ACCT=y"
 
 echo "eBPF configuration applied successfully!"
-EBPF_SCRIPT
+EOF
 
           chmod +x apply_ebpf_config.sh
           ./apply_ebpf_config.sh
