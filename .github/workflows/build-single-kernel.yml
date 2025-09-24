@@ -23,7 +23,7 @@ jobs:
       sub_level: "124"
       os_patch_level: "2025-02"
       kernelsu_variant: "SukiSU"
-      kernelsu_branch: "Dev"
+      kernelsu_branch: "Dev(开发)"
       version: ""
       use_zram: true
       use_kpm: true
