@@ -506,9 +506,9 @@ add_config() {
     local config_name="${option%=*}"
 
     if grep -q "^${config_name}=" "$CONFIG_FILE"; then
-        sed -i "s/^${config_name}=.*/${option}/" "$CONFIG_FILE"
+        sed -i "s|^${config_name}=.*|${option}|" "$CONFIG_FILE"
     elif grep -q "^# ${config_name} is not set" "$CONFIG_FILE"; then
-        sed -i "s/^# ${config_name} is not set/${option}/" "$CONFIG_FILE"
+        sed -i "s|^# ${config_name} is not set|${option}|" "$CONFIG_FILE"
     else
         echo "$option" >> "$CONFIG_FILE"
     fi
