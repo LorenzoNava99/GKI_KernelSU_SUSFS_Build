@@ -1,0 +1,30 @@
+name: Build Android14-6.1.124 KernelSU+SUSFS
+
+permissions:
+  contents: write
+  actions: write
+
+on:
+  workflow_dispatch:
+  push:
+    branches:
+      - main
+    paths:
+      - '.github/workflows/build-single-kernel.yml'
+
+jobs:
+  build-kernel-a14-6-1-124:
+    uses: ./.github/workflows/gki-kernel.yml
+    secrets: inherit
+    with:
+      make_release: false
+      android_version: "android14"
+      kernel_version: "6.1"
+      sub_level: "124"
+      os_patch_level: "2025-02"
+      kernelsu_variant: "SukiSU"
+      kernelsu_branch: "Dev"
+      version: ""
+      use_zram: true
+      use_kpm: true
+      supp_op: false
