@@ -1,0 +1,59 @@
+name: Android 14 6.1 EBPF
+permissions:
+  contents: write
+  actions: write
+
+on:
+  workflow_call:
+    inputs:
+      make_release:
+        required: true
+        type: boolean
+        default: false
+      kernelsu_variant:
+        required: true
+        type: string
+        default: SukiSU
+      kernelsu_branch:
+        required: true
+        type: string
+        default: Dev(开发)
+      version:
+        required: false
+        type: string
+        default: "EBPF-FULL"
+      use_zram:
+        required: true
+        type: boolean
+        default: true
+      use_kpm:
+        required: true
+        type: boolean
+        default: true
+      supp_op:
+        required: false
+        type: boolean
+        default: false
+
+jobs:
+  build-kernel-a14-6-1-kernelsu-susfs:
+    strategy:
+      fail-fast: false
+      matrix:
+        include:
+          - sub_level: "124"
+            os_patch_level: "2025-02"
+    uses: ./.github/workflows/gki-kernel.yml
+    secrets: inherit
+    with:
+      make_release: ${{ inputs.make_release }}
+      android_version: "android14"
+      kernel_version: "6.1"
+      sub_level: ${{ matrix.sub_level }}
+      os_patch_level: ${{ matrix.os_patch_level }}
+      kernelsu_variant: ${{ inputs.kernelsu_variant }}
+      kernelsu_branch: ${{ inputs.kernelsu_branch }}
+      version: ${{ inputs.version }}
+      use_zram: ${{ inputs.use_zram }}
+      use_kpm: ${{ inputs.use_kpm }}
+      supp_op: ${{ inputs.supp_op }}
