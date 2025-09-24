@@ -14,15 +14,20 @@ on:
       - 'ebpf_full_config'
 
 jobs:
-  build-kernel-a14-6-1-124-ebpf:
+  build-kernel-a14-6-1-kernelsu-susfs:
+    strategy:
+      matrix:
+        include:
+          - sub_level: "124"
+            os_patch_level: "2025-02"
     uses: ./.github/workflows/gki-kernel.yml
     secrets: inherit
     with:
       make_release: false
       android_version: "android14"
       kernel_version: "6.1"
-      sub_level: "124"
-      os_patch_level: "2025-02"
+      sub_level: ${{ matrix.sub_level }}
+      os_patch_level: ${{ matrix.os_patch_level }}
       kernelsu_variant: "SukiSU"
       kernelsu_branch: "Dev(开发)"
       version: "EBPF-FULL"
