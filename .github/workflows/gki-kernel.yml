@@ -491,14 +491,17 @@ jobs:
           echo "Applying full eBPF kernel configuration..."
           cd "$CONFIG"
 
-          # Copy our eBPF configuration script
-          cp ${{ github.workspace }}/apply_ebpf_config.sh . 2>/dev/null || true
+          # Use the standalone script from the repository
+          if [ -f "${{ github.workspace }}/scripts/apply_ebpf_to_kernel.sh" ]; then
+            echo "Using repository's eBPF configuration script"
+            chmod +x "${{ github.workspace }}/scripts/apply_ebpf_to_kernel.sh"
+            "${{ github.workspace }}/scripts/apply_ebpf_to_kernel.sh" ./common/arch/arm64/configs/gki_defconfig
+          else
+            echo "Warning: eBPF configuration script not found, creating inline..."
 
-          # If script doesn't exist in repo, create it inline
-          if [ ! -f apply_ebpf_config.sh ]; then
             cat > apply_ebpf_config.sh << 'EOF'
 #!/bin/bash
-CONFIG_FILE="./common/arch/arm64/configs/gki_defconfig"
+CONFIG_FILE="${1:-./common/arch/arm64/configs/gki_defconfig}"
 echo "Applying full eBPF configuration to $CONFIG_FILE"
 
 add_config() {
@@ -512,10 +515,6 @@ add_config() {
         echo "$option" >> "$CONFIG_FILE"
     fi
 }
-EOF
-          fi
-
-          cat >> apply_ebpf_config.sh << 'EOF'
 
 echo "Adding eBPF configurations..."
 # BASIC BPF SUPPORT
@@ -626,8 +625,9 @@ add_config "CONFIG_TASK_DELAY_ACCT=y"
 echo "eBPF configuration applied successfully!"
 EOF
 
-          chmod +x apply_ebpf_config.sh
-          ./apply_ebpf_config.sh
+            chmod +x apply_ebpf_config.sh
+            ./apply_ebpf_config.sh ./common/arch/arm64/configs/gki_defconfig
+          fi
 
           echo "eBPF configuration completed!"
 
