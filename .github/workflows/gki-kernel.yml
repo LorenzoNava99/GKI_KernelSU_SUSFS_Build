@@ -498,19 +498,19 @@ jobs:
 
 CONFIG_FILE="./common/arch/arm64/configs/gki_defconfig"
 
-echo "Applying full eBPF configuration to \$CONFIG_FILE"
+echo "Applying full eBPF configuration to $CONFIG_FILE"
 
 # Function to add or update a config option
 add_config() {
-    local option="\$1"
-    local config_name="\${option%=*}"
+    local option="$1"
+    local config_name="${option%=*}"
 
-    if grep -q "^\${config_name}=" "\$CONFIG_FILE"; then
-        sed -i "s/^\${config_name}=.*/\${option}/" "\$CONFIG_FILE"
-    elif grep -q "^# \${config_name} is not set" "\$CONFIG_FILE"; then
-        sed -i "s/^# \${config_name} is not set/\${option}/" "\$CONFIG_FILE"
+    if grep -q "^${config_name}=" "$CONFIG_FILE"; then
+        sed -i "s/^${config_name}=.*/${option}/" "$CONFIG_FILE"
+    elif grep -q "^# ${config_name} is not set" "$CONFIG_FILE"; then
+        sed -i "s/^# ${config_name} is not set/${option}/" "$CONFIG_FILE"
     else
-        echo "\$option" >> "\$CONFIG_FILE"
+        echo "$option" >> "$CONFIG_FILE"
     fi
 }
 
