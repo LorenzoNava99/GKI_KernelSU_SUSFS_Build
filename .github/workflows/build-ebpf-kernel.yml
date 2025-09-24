@@ -16,6 +16,7 @@ on:
 jobs:
   build-kernel-a14-6-1-kernelsu-susfs:
     strategy:
+      fail-fast: false
       matrix:
         include:
           - sub_level: "124"
