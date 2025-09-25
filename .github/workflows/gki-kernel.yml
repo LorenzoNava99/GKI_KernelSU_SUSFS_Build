@@ -488,7 +488,7 @@ jobs:
       - name: Apply Full eBPF Configuration
         if: contains(inputs.version, 'EBPF')
         run: |
-          echo "Applying essential eBPF kernel configuration for Android GKI..."
+          echo "Applying comprehensive eBPF kernel configuration for Android GKI..."
           cd "$CONFIG"
 
           CONFIG_FILE="./common/arch/arm64/configs/gki_defconfig"
@@ -511,62 +511,208 @@ jobs:
           }
 
           echo "========================================="
-          echo "Adding CORE BPF SUPPORT (ESSENTIAL)"
+          echo "Section 1: BASELINE REQUIREMENTS"
+          echo "========================================="
+          add_config "CONFIG_EXPERT=y"
+          add_config "CONFIG_MODULES=y"
+          add_config "CONFIG_KALLSYMS=y"
+          add_config "CONFIG_KALLSYMS_ALL=y"
+          add_config "CONFIG_PROC_FS=y"
+          add_config "CONFIG_SYSFS=y"
+          add_config "CONFIG_DEVTMPFS=y"
+          add_config "CONFIG_CGROUPS=y"
+          add_config "CONFIG_MEMCG=y"
+          add_config "CONFIG_PSI=y"
+          add_config "CONFIG_TASK_XACCT=y"
+          add_config "CONFIG_TASK_IO_ACCOUNTING=y"
+          add_config "CONFIG_TASKSTATS=y"
+          add_config "CONFIG_SCHED_INFO=y"
+          add_config "CONFIG_ARCH_WANT_DEFAULT_BPF_JIT=y"
+
+          echo "========================================="
+          echo "Section 2: CORE BPF ENABLEMENT"
           echo "========================================="
           add_config "CONFIG_BPF=y"
           add_config "CONFIG_BPF_SYSCALL=y"
           add_config "CONFIG_BPF_JIT=y"
+          add_config "CONFIG_BPF_JIT_ALWAYS_ON=y"
           add_config "CONFIG_HAVE_EBPF_JIT=y"
+          add_config "CONFIG_BPF_UNPRIV_DEFAULT_OFF=y"
+          add_config "CONFIG_BPF_KPROBE_OVERRIDE=y"
+          add_config "CONFIG_BPF_PRELOAD=y"
+          add_config "CONFIG_BPF_PRELOAD_UMD=y"
+          add_config "CONFIG_BPF_STREAM_PARSER=y"
+          # EXPLICITLY DISABLED: CONFIG_BPFILTER causes compilation errors
+          # CONFIG_BPFILTER=n
+          # CONFIG_BPFILTER_UMH=n
 
           echo "========================================="
-          echo "Adding KPROBES (CRITICAL FOR TRACING)"
+          echo "Section 3: ANDROID NETWORKING STACK"
           echo "========================================="
+          add_config "CONFIG_NET=y"
+          add_config "CONFIG_INET=y"
+          add_config "CONFIG_IPV6=y"
+          add_config "CONFIG_NETFILTER=y"
+          add_config "CONFIG_NETFILTER_ADVANCED=y"
+          add_config "CONFIG_NETFILTER_NETLINK=y"
+          add_config "CONFIG_NETFILTER_XT_MATCH_BPF=y"
+          add_config "CONFIG_NETFILTER_XT_MATCH_OWNER=y"
+          add_config "CONFIG_NETFILTER_XT_MATCH_SOCKET=y"
+          add_config "CONFIG_NF_SOCKET_IPV4=y"
+          add_config "CONFIG_NF_SOCKET_IPV6=y"
+          add_config "CONFIG_CGROUP_NET_CLASSID=y"
+          add_config "CONFIG_CGROUP_BPF=y"
+          add_config "CONFIG_BPF_SYSCALL=y"
+          add_config "CONFIG_XDP_SOCKETS=y"
+          add_config "CONFIG_XDP_SOCKETS_DIAG=y"
+          add_config "CONFIG_NET_CLS_BPF=y"
+          add_config "CONFIG_NET_ACT_BPF=y"
+          add_config "CONFIG_NET_CLS_ACT=y"
+          add_config "CONFIG_NET_SCH_INGRESS=y"
+          add_config "CONFIG_NET_CLS_U32=y"
+          add_config "CONFIG_NET_IPIP=y"
+          add_config "CONFIG_IPV6_TUNNEL=y"
+          add_config "CONFIG_IPV6_GRE=y"
+          add_config "CONFIG_NET_FOU=y"
+          add_config "CONFIG_NET_FOU_IP_TUNNELS=y"
+          add_config "CONFIG_INET_ESP=y"
+          add_config "CONFIG_INET6_ESP=y"
+          add_config "CONFIG_IFB=y"
+          add_config "CONFIG_BPFFS=y"
+          add_config "CONFIG_TEST_BPF=m"
+
+          echo "========================================="
+          echo "Section 4: TRACING AND PERF"
+          echo "========================================="
+          # Kprobes
           add_config "CONFIG_KPROBES=y"
           add_config "CONFIG_KPROBE_EVENTS=y"
+          add_config "CONFIG_KPROBE_EVENTS_ON_NOTRACE=y"
           add_config "CONFIG_HAVE_KPROBES=y"
-          add_config "CONFIG_BPF_KPROBE_OVERRIDE=y"  # MOST IMPORTANT!
+          add_config "CONFIG_ARCH_SUPPORTS_KPROBES=y"
+          add_config "CONFIG_KPROBES_ON_FTRACE=y"
+          add_config "CONFIG_HAVE_KPROBES_ON_FTRACE=y"
+          add_config "CONFIG_KRETPROBES=y"
+          add_config "CONFIG_HAVE_KRETPROBES=y"
+          add_config "CONFIG_HAVE_RETHOOK=y"
+          add_config "CONFIG_RETHOOK=y"
 
-          echo "========================================="
-          echo "Adding UPROBES (USER-SPACE PROBING)"
-          echo "========================================="
+          # Uprobes
           add_config "CONFIG_UPROBES=y"
           add_config "CONFIG_UPROBE_EVENTS=y"
+          add_config "CONFIG_ARCH_SUPPORTS_UPROBES=y"
+          add_config "CONFIG_HAVE_ARCH_UPROBES=y"
+          add_config "CONFIG_MMU=y"
 
-          echo "========================================="
-          echo "Adding DEBUG INFO (FOR BTF)"
-          echo "========================================="
-          add_config "CONFIG_DEBUG_INFO=y"
-          add_config "CONFIG_DEBUG_INFO_BTF=y"
-          add_config "CONFIG_DEBUG_INFO_BTF_MODULES=y"
+          # Fprobes
+          add_config "CONFIG_FPROBE=y"
+          add_config "CONFIG_FPROBE_EVENTS=y"
+          add_config "CONFIG_HAVE_FPROBE=y"
 
-          echo "========================================="
-          echo "Adding TRACING INFRASTRUCTURE"
-          echo "========================================="
-          add_config "CONFIG_TRACING=y"
+          # Ftrace
           add_config "CONFIG_FTRACE=y"
           add_config "CONFIG_FUNCTION_TRACER=y"
+          add_config "CONFIG_FUNCTION_GRAPH_TRACER=y"
           add_config "CONFIG_DYNAMIC_FTRACE=y"
+          add_config "CONFIG_HAVE_DYNAMIC_FTRACE=y"
           add_config "CONFIG_FTRACE_SYSCALLS=y"
+          add_config "CONFIG_HAVE_FTRACE_MCOUNT_RECORD=y"
+          add_config "CONFIG_FTRACE_MCOUNT_RECORD=y"
+          add_config "CONFIG_FTRACE_MCOUNT_USE_PATCHABLE_FUNCTION_ENTRY=y"
+          add_config "CONFIG_DYNAMIC_FTRACE_WITH_ARGS=y"
+          add_config "CONFIG_DYNAMIC_FTRACE_WITH_DIRECT_CALLS=y"
+          add_config "CONFIG_HAVE_DYNAMIC_FTRACE_WITH_DIRECT_CALLS=y"
+          add_config "CONFIG_DYNAMIC_FTRACE_WITH_REGS=y"
+          add_config "CONFIG_HAVE_DYNAMIC_FTRACE_WITH_REGS=y"
 
-          echo "========================================="
-          echo "Adding PERF EVENTS (PERFORMANCE MONITORING)"
-          echo "========================================="
+          # Perf
           add_config "CONFIG_PERF_EVENTS=y"
           add_config "CONFIG_HW_PERF_EVENTS=y"
+          add_config "CONFIG_PERF_USE_VMALLOC=y"
+          add_config "CONFIG_HAVE_PERF_EVENTS=y"
+          add_config "CONFIG_HAVE_HW_PERF_EVENTS=y"
+          add_config "CONFIG_HAVE_PERF_USER_STACK_DUMP=y"
+          add_config "CONFIG_HAVE_PERF_REGS=y"
+
+          # Tracing
+          add_config "CONFIG_TRACING=y"
+          add_config "CONFIG_TRACING_SUPPORT=y"
+          add_config "CONFIG_TRACE_CLOCK=y"
+          add_config "CONFIG_RING_BUFFER=y"
+          add_config "CONFIG_EVENT_TRACING=y"
+          add_config "CONFIG_CONTEXT_SWITCH_TRACER=y"
+          add_config "CONFIG_TRACING_MAP=y"
+          add_config "CONFIG_HIST_TRIGGERS=y"
+          add_config "CONFIG_TRACER_SNAPSHOT=y"
+          add_config "CONFIG_STACK_TRACER=y"
+          add_config "CONFIG_BLK_DEV_IO_TRACE=y"
+          add_config "CONFIG_PROBE_EVENTS_BTF_ARGS=y"
+
+          # Error injection
+          add_config "CONFIG_FUNCTION_ERROR_INJECTION=y"
+          add_config "CONFIG_HAVE_FUNCTION_ERROR_INJECTION=y"
+          add_config "CONFIG_FAIL_FUNCTION=y"
 
           echo "========================================="
-          echo "Adding KERNEL HEADERS (FOR BCC)"
+          echo "Section 5: BTF AND CO-RE SUPPORT"
           echo "========================================="
+          add_config "CONFIG_DEBUG_INFO=y"
+          add_config "CONFIG_DEBUG_INFO_DWARF5=y"
+          add_config "CONFIG_DEBUG_INFO_BTF=y"
+          add_config "CONFIG_DEBUG_INFO_BTF_MODULES=y"
+          add_config "CONFIG_PAHOLE_HAS_SPLIT_BTF=y"
+          add_config "CONFIG_PAHOLE_HAS_BTF_TAG=y"
+          add_config "CONFIG_PAHOLE_HAS_LANG_EXCLUDE=y"
+          add_config "CONFIG_DEBUG_INFO_COMPRESSED_NONE=y"
+          add_config "CONFIG_MODULE_ALLOW_BTF_MISMATCH=y"
+          add_config "CONFIG_BPF_CO_RE=y"
+
+          # Kernel headers for BCC
           add_config "CONFIG_IKHEADERS=y"
+          add_config "CONFIG_IKCONFIG=y"
+          add_config "CONFIG_IKCONFIG_PROC=y"
 
           echo "========================================="
-          echo "eBPF configuration applied successfully!"
+          echo "Section 6: BPF LSM (Security)"
+          echo "========================================="
+          add_config "CONFIG_SECURITY=y"
+          add_config "CONFIG_SECURITYFS=y"
+          add_config "CONFIG_SECURITY_NETWORK=y"
+          add_config "CONFIG_SECURITY_PATH=y"
+          add_config "CONFIG_LSM=\"lockdown,yama,loadpin,safesetid,bpf,selinux\""
+          add_config "CONFIG_BPF_LSM=y"
+          add_config "CONFIG_SECURITY_BPF=y"
+          add_config "CONFIG_SECURITY_NETWORK_XFRM=y"
+
+          echo "========================================="
+          echo "Section 7: LIRC (IR Control)"
+          echo "========================================="
+          add_config "CONFIG_BPF_LIRC_MODE2=y"
+          add_config "CONFIG_RC_CORE=y"
+          add_config "CONFIG_RC_DEVICES=y"
+          add_config "CONFIG_RC_DECODERS=y"
+          add_config "CONFIG_LIRC=y"
+
+          echo "========================================="
+          echo "Verification Phase"
           echo "========================================="
 
-          # Verify critical configs were added
-          echo ""
+          # Critical configs to verify
+          CRITICAL_CONFIGS=(
+              "CONFIG_BPF"
+              "CONFIG_BPF_SYSCALL"
+              "CONFIG_BPF_JIT"
+              "CONFIG_BPF_KPROBE_OVERRIDE"
+              "CONFIG_KPROBES"
+              "CONFIG_UPROBES"
+              "CONFIG_DEBUG_INFO_BTF"
+              "CONFIG_CGROUP_BPF"
+              "CONFIG_IKHEADERS"
+              "CONFIG_BPF_LSM"
+          )
+
           echo "Verifying critical eBPF configs..."
-          for config in CONFIG_BPF CONFIG_BPF_SYSCALL CONFIG_KPROBES CONFIG_BPF_KPROBE_OVERRIDE CONFIG_UPROBES CONFIG_DEBUG_INFO_BTF CONFIG_IKHEADERS; do
+          for config in "${CRITICAL_CONFIGS[@]}"; do
               if grep -q "^${config}=y" "$CONFIG_FILE"; then
                   echo "✓ ${config} enabled"
               else
@@ -575,9 +721,7 @@ jobs:
           done
 
           echo ""
-          echo "Configuration complete!"
-
-          echo "eBPF configuration completed!"
+          echo "eBPF configuration completed with comprehensive features!"
 
       - name: 配置内核名称
         run: |
