@@ -671,8 +671,8 @@ jobs:
           add_config "CONFIG_MODULE_ALLOW_BTF_MISMATCH=y"
           add_config "CONFIG_BPF_CO_RE=y"
 
-          # Kernel headers for BCC
-          add_config "CONFIG_IKHEADERS=y"
+          # Kernel headers for BCC - Build as module to generate kheaders.ko
+          add_config "CONFIG_IKHEADERS=m"  # MUST be module (m) not built-in (y)
           add_config "CONFIG_IKCONFIG=y"
           add_config "CONFIG_IKCONFIG_PROC=y"
 
