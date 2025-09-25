@@ -729,6 +729,86 @@ jobs:
           echo ""
           echo "eBPF configuration completed with comprehensive features!"
 
+      - name: Apply Minimal BPF Override Configuration
+        if: contains(inputs.version, 'BPF-OVERRIDE-MINIMAL')
+        run: |
+          echo "Applying minimal BPF configuration for bpf_override_return only..."
+          cd "$CONFIG"
+
+          CONFIG_FILE="./common/arch/arm64/configs/gki_defconfig"
+
+          add_config() {
+              local config="$1"
+              if ! grep -q "^${config}" "$CONFIG_FILE"; then
+                  echo "${config}" >> "$CONFIG_FILE"
+                  echo "Added: ${config}"
+              else
+                  sed -i "s/^${config%%=*}=.*/${config}/" "$CONFIG_FILE"
+                  echo "Updated: ${config}"
+              fi
+          }
+
+          echo "========================================="
+          echo "MINIMAL BPF OVERRIDE CONFIGURATION"
+          echo "========================================="
+
+          # Core BPF requirements
+          add_config "CONFIG_BPF=y"
+          add_config "CONFIG_BPF_SYSCALL=y"
+          add_config "CONFIG_BPF_JIT=y"
+          add_config "CONFIG_HAVE_EBPF_JIT=y"
+
+          # Kprobe and tracing requirements
+          add_config "CONFIG_KPROBES=y"
+          add_config "CONFIG_KPROBE_EVENTS=y"
+          add_config "CONFIG_HAVE_KPROBES=y"
+          add_config "CONFIG_HAVE_REGS_AND_STACK_ACCESS_API=y"
+          add_config "CONFIG_KPROBES_ON_FTRACE=y"
+          add_config "CONFIG_HAVE_KPROBES_ON_FTRACE=y"
+
+          # Function tracing requirements
+          add_config "CONFIG_FTRACE=y"
+          add_config "CONFIG_FUNCTION_TRACER=y"
+          add_config "CONFIG_DYNAMIC_FTRACE=y"
+          add_config "CONFIG_HAVE_DYNAMIC_FTRACE=y"
+
+          # CRITICAL: BPF_KPROBE_OVERRIDE requirements
+          add_config "CONFIG_BPF_EVENTS=y"  # MANDATORY prerequisite
+          add_config "CONFIG_FUNCTION_ERROR_INJECTION=y"  # MANDATORY for override
+          add_config "CONFIG_HAVE_FUNCTION_ERROR_INJECTION=y"
+          add_config "CONFIG_BPF_KPROBE_OVERRIDE=y"  # The main feature
+
+          # Module headers (to avoid kheaders.ko error)
+          add_config "CONFIG_IKHEADERS=m"
+          add_config "CONFIG_IKCONFIG=y"
+          add_config "CONFIG_IKCONFIG_PROC=y"
+
+          # Basic debugging support
+          add_config "CONFIG_DEBUG_INFO=y"
+          add_config "CONFIG_DEBUG_INFO_BTF=y"
+          add_config "CONFIG_DEBUG_INFO_DWARF4=y"
+          add_config "CONFIG_DEBUG_INFO_REDUCED=n"
+
+          echo ""
+          echo "Verifying critical BPF override configs..."
+          CRITICAL_CONFIGS=(
+              "CONFIG_BPF_EVENTS"
+              "CONFIG_FUNCTION_ERROR_INJECTION"
+              "CONFIG_BPF_KPROBE_OVERRIDE"
+              "CONFIG_IKHEADERS"
+          )
+
+          for config in "${CRITICAL_CONFIGS[@]}"; do
+              if grep -q "^${config}=" "$CONFIG_FILE"; then
+                  echo "✓ ${config} enabled"
+              else
+                  echo "✗ WARNING: ${config} not enabled!"
+              fi
+          done
+
+          echo ""
+          echo "Minimal BPF override configuration completed!"
+
       - name: 配置内核名称
         run: |
           echo "更改为配置目录: $CONFIG..."

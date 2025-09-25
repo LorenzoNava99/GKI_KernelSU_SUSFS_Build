@@ -1,4 +1,4 @@
-name: Build Android14-6.1.124 KernelSU+SUSFS
+name: Build Android14-6.1.124 BPF Override Minimal
 
 permissions:
   contents: write
@@ -13,7 +13,7 @@ on:
       - '.github/workflows/build-single-kernel.yml'
 
 jobs:
-  build-kernel-a14-6-1-124:
+  build-kernel-a14-6-1-124-bpf-override:
     uses: ./.github/workflows/gki-kernel.yml
     secrets: inherit
     with:
@@ -24,7 +24,7 @@ jobs:
       os_patch_level: "2025-02"
       kernelsu_variant: "SukiSU"
       kernelsu_branch: "Dev(开发)"
-      version: ""
+      version: "BPF-OVERRIDE-MINIMAL"
       use_zram: true
       use_kpm: true
       supp_op: false
