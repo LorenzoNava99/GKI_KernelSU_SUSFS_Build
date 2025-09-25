@@ -27,4 +27,4 @@ jobs:
       version: "EBPF-ESSENTIAL-FIXED"
       use_zram: true
       use_kpm: true
-      supp_op: false
+      supp_op: false# Trigger builds with kheaders fix
