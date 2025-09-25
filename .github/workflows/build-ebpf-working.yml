@@ -24,7 +24,7 @@ jobs:
       os_patch_level: "2025-02"
       kernelsu_variant: "SukiSU"
       kernelsu_branch: "Dev(开发)"
-      version: "EBPF-ESSENTIAL"
+      version: "EBPF-ESSENTIAL-FIXED"
       use_zram: true
       use_kpm: true
       supp_op: false

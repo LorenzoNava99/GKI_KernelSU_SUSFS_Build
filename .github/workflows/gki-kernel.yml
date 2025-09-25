@@ -538,7 +538,8 @@ jobs:
           add_config "CONFIG_BPF_JIT_ALWAYS_ON=y"
           add_config "CONFIG_HAVE_EBPF_JIT=y"
           add_config "CONFIG_BPF_UNPRIV_DEFAULT_OFF=y"
-          add_config "CONFIG_BPF_KPROBE_OVERRIDE=y"
+          add_config "CONFIG_BPF_EVENTS=y"  # MANDATORY for BPF_KPROBE_OVERRIDE
+          add_config "CONFIG_BPF_KPROBE_OVERRIDE=y"  # MANDATORY requirement
           add_config "CONFIG_BPF_PRELOAD=y"
           add_config "CONFIG_BPF_PRELOAD_UMD=y"
           add_config "CONFIG_BPF_STREAM_PARSER=y"
@@ -584,7 +585,7 @@ jobs:
           echo "========================================="
           echo "Section 4: TRACING AND PERF"
           echo "========================================="
-          # Kprobes
+          # Kprobes (with BPF_KPROBE_OVERRIDE prerequisites)
           add_config "CONFIG_KPROBES=y"
           add_config "CONFIG_KPROBE_EVENTS=y"
           add_config "CONFIG_KPROBE_EVENTS_ON_NOTRACE=y"
@@ -596,6 +597,7 @@ jobs:
           add_config "CONFIG_HAVE_KRETPROBES=y"
           add_config "CONFIG_HAVE_RETHOOK=y"
           add_config "CONFIG_RETHOOK=y"
+          add_config "CONFIG_HAVE_REGS_AND_STACK_ACCESS_API=y"  # Required for kprobes
 
           # Uprobes
           add_config "CONFIG_UPROBES=y"
@@ -648,10 +650,12 @@ jobs:
           add_config "CONFIG_BLK_DEV_IO_TRACE=y"
           add_config "CONFIG_PROBE_EVENTS_BTF_ARGS=y"
 
-          # Error injection
-          add_config "CONFIG_FUNCTION_ERROR_INJECTION=y"
+          # Error injection (MANDATORY for BPF_KPROBE_OVERRIDE)
+          add_config "CONFIG_FUNCTION_ERROR_INJECTION=y"  # MANDATORY for BPF_KPROBE_OVERRIDE
           add_config "CONFIG_HAVE_FUNCTION_ERROR_INJECTION=y"
           add_config "CONFIG_FAIL_FUNCTION=y"
+          add_config "CONFIG_FAILSLAB=y"
+          add_config "CONFIG_FAIL_PAGE_ALLOC=y"
 
           echo "========================================="
           echo "Section 5: BTF AND CO-RE SUPPORT"
@@ -702,7 +706,9 @@ jobs:
               "CONFIG_BPF"
               "CONFIG_BPF_SYSCALL"
               "CONFIG_BPF_JIT"
+              "CONFIG_BPF_EVENTS"
               "CONFIG_BPF_KPROBE_OVERRIDE"
+              "CONFIG_FUNCTION_ERROR_INJECTION"
               "CONFIG_KPROBES"
               "CONFIG_UPROBES"
               "CONFIG_DEBUG_INFO_BTF"
