@@ -809,6 +809,147 @@ jobs:
           echo ""
           echo "Minimal BPF override configuration completed!"
 
+      - name: Apply Moderate BPF Configuration
+        if: contains(inputs.version, 'BPF-MODERATE')
+        run: |
+          echo "Applying moderate BPF configuration with safe enhancements..."
+          cd "$CONFIG"
+
+          CONFIG_FILE="./common/arch/arm64/configs/gki_defconfig"
+
+          add_config() {
+              local config="$1"
+              if ! grep -q "^${config}" "$CONFIG_FILE"; then
+                  echo "${config}" >> "$CONFIG_FILE"
+                  echo "Added: ${config}"
+              else
+                  sed -i "s/^${config%%=*}=.*/${config}/" "$CONFIG_FILE"
+                  echo "Updated: ${config}"
+              fi
+          }
+
+          echo "========================================="
+          echo "MODERATE BPF CONFIGURATION"
+          echo "========================================="
+
+          echo "=== Section 1: Core BPF Support ==="
+          add_config "CONFIG_BPF=y"
+          add_config "CONFIG_BPF_SYSCALL=y"
+          add_config "CONFIG_BPF_JIT=y"
+          add_config "CONFIG_BPF_JIT_DEFAULT_ON=y"
+          add_config "CONFIG_BPF_JIT_ALWAYS_ON=y"
+          add_config "CONFIG_HAVE_EBPF_JIT=y"
+          add_config "CONFIG_HAVE_BPF_JIT_LIMIT=y"
+
+          echo "=== Section 2: Kprobes & Function Tracing ==="
+          add_config "CONFIG_KPROBES=y"
+          add_config "CONFIG_KPROBE_EVENTS=y"
+          add_config "CONFIG_HAVE_KPROBES=y"
+          add_config "CONFIG_KRETPROBES=y"
+          add_config "CONFIG_HAVE_KRETPROBES=y"
+          add_config "CONFIG_HAVE_REGS_AND_STACK_ACCESS_API=y"
+          add_config "CONFIG_KPROBES_ON_FTRACE=y"
+          add_config "CONFIG_HAVE_KPROBES_ON_FTRACE=y"
+          add_config "CONFIG_FTRACE=y"
+          add_config "CONFIG_FUNCTION_TRACER=y"
+          add_config "CONFIG_DYNAMIC_FTRACE=y"
+          add_config "CONFIG_HAVE_DYNAMIC_FTRACE=y"
+          add_config "CONFIG_DYNAMIC_FTRACE_WITH_REGS=y"
+          add_config "CONFIG_DYNAMIC_FTRACE_WITH_DIRECT_CALLS=y"
+
+          echo "=== Section 3: BPF Override Support ==="
+          add_config "CONFIG_BPF_EVENTS=y"
+          add_config "CONFIG_FUNCTION_ERROR_INJECTION=y"
+          add_config "CONFIG_HAVE_FUNCTION_ERROR_INJECTION=y"
+          add_config "CONFIG_BPF_KPROBE_OVERRIDE=y"
+
+          echo "=== Section 4: Userspace Probing ==="
+          add_config "CONFIG_UPROBE_EVENTS=y"
+          add_config "CONFIG_UPROBES=y"
+          add_config "CONFIG_ARCH_SUPPORTS_UPROBES=y"
+
+          echo "=== Section 5: Performance Monitoring ==="
+          add_config "CONFIG_PERF_EVENTS=y"
+          add_config "CONFIG_HW_PERF_EVENTS=y"
+          add_config "CONFIG_HAVE_PERF_EVENTS=y"
+          add_config "CONFIG_HAVE_PERF_USER_STACK_DUMP=y"
+
+          echo "=== Section 6: BPF Maps & Data Structures ==="
+          add_config "CONFIG_BPF_SYSCALL_MAPS=y"
+          add_config "CONFIG_BPF_MAP_TYPE_PERCPU=y"
+          add_config "CONFIG_BPF_MAP_TYPE_LRU=y"
+          add_config "CONFIG_BPF_RINGBUF=y"
+          add_config "CONFIG_HAVE_BPF_RINGBUF=y"
+
+          echo "=== Section 7: Stack Tracing ==="
+          add_config "CONFIG_STACKTRACE=y"
+          add_config "CONFIG_STACK_TRACER=y"
+          add_config "CONFIG_BPF_STACK_BUILD_ID=y"
+          add_config "CONFIG_STACKTRACE_SUPPORT=y"
+          add_config "CONFIG_USER_STACKTRACE_SUPPORT=y"
+
+          echo "=== Section 8: Socket & Network Monitoring ==="
+          add_config "CONFIG_SOCK_FILTER=y"
+          add_config "CONFIG_BPF_SOCK_OPS=y"
+          add_config "CONFIG_INET_DIAG=y"
+          add_config "CONFIG_INET_TCP_DIAG=y"
+          add_config "CONFIG_INET_UDP_DIAG=y"
+          add_config "CONFIG_INET_DIAG_DESTROY=y"
+
+          echo "=== Section 9: Cgroup BPF (Android needs this) ==="
+          add_config "CONFIG_CGROUP_BPF=y"
+          add_config "CONFIG_BPF_CGROUP_STORAGE=y"
+
+          echo "=== Section 10: BPF Iterators ==="
+          add_config "CONFIG_BPF_ITER=y"
+          add_config "CONFIG_BPF_TASK_ITER=y"
+          add_config "CONFIG_BPF_PROG_ITER=y"
+
+          echo "=== Section 11: Enhanced BTF & CO-RE ==="
+          add_config "CONFIG_DEBUG_INFO=y"
+          add_config "CONFIG_DEBUG_INFO_BTF=y"
+          add_config "CONFIG_DEBUG_INFO_BTF_MODULES=y"
+          add_config "CONFIG_DEBUG_INFO_DWARF4=y"
+          add_config "CONFIG_DEBUG_INFO_REDUCED=n"
+          add_config "CONFIG_MODULE_ALLOW_BTF_MISMATCH=y"
+          add_config "CONFIG_PAHOLE_HAS_SPLIT_BTF=y"
+          add_config "CONFIG_PAHOLE_HAS_BTF_TAG=y"
+
+          echo "=== Section 12: Module Headers ==="
+          add_config "CONFIG_IKHEADERS=m"
+          add_config "CONFIG_IKCONFIG=y"
+          add_config "CONFIG_IKCONFIG_PROC=y"
+
+          echo "=== Section 13: Memory & Scheduler Hooks ==="
+          add_config "CONFIG_BPF_MEMALLOC=y"
+          add_config "CONFIG_BPF_MEMCG=y"
+          add_config "CONFIG_SCHED_BPF=y"
+
+          echo ""
+          echo "Verifying critical BPF moderate configs..."
+          CRITICAL_CONFIGS=(
+              "CONFIG_BPF"
+              "CONFIG_BPF_SYSCALL"
+              "CONFIG_BPF_EVENTS"
+              "CONFIG_BPF_KPROBE_OVERRIDE"
+              "CONFIG_UPROBE_EVENTS"
+              "CONFIG_PERF_EVENTS"
+              "CONFIG_CGROUP_BPF"
+              "CONFIG_BPF_RINGBUF"
+              "CONFIG_IKHEADERS"
+          )
+
+          for config in "${CRITICAL_CONFIGS[@]}"; do
+              if grep -q "^${config}=" "$CONFIG_FILE"; then
+                  echo "✓ ${config} enabled"
+              else
+                  echo "✗ WARNING: ${config} not enabled!"
+              fi
+          done
+
+          echo ""
+          echo "BPF moderate configuration completed with safe enhancements!"
+
       - name: 配置内核名称
         run: |
           echo "更改为配置目录: $CONFIG..."
